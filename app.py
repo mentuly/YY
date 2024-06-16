@@ -8,11 +8,9 @@ from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
-# Налаштування бази даних SQLite, що зберігається в пам'яті (можна змінити на файлову базу даних)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
 
-# Модель користувача
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -21,7 +19,6 @@ class User(db.Model):
     def __repr__(self):
         return f"User('{self.email}')"
 
-# Модель продукту (товару)
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -31,7 +28,6 @@ class Product(db.Model):
     def __repr__(self):
         return f"Product('{self.title}', '{self.author}', '{self.genre}')"
 
-# Клас форми для реєстрації користувача
 class RegistrationForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -43,24 +39,19 @@ class RegistrationForm(FlaskForm):
         if user:
             raise ValidationError('This email is already taken. Please choose a different one.')
 
-# Клас форми для входу користувача
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
-# Клас форми для створення та редагування товару
 class ProductForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     author = StringField('Author', validators=[DataRequired()])
     genre = StringField('Genre', validators=[DataRequired()])
     submit = SubmitField('Save Changes')
 
-# Забезпечення створення всіх таблиць бази даних
 with app.app_context():
     db.create_all()
-
-    # Додавання початкових товарів
     if not Product.query.first():
         initial_products = [
             Product(title='Book 1', author='Author 1', genre='Fiction'),
